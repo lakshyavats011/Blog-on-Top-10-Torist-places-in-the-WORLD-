@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WORLD: UNLOCKED | SUPREME FINAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --accent: #00f2ff;
+            --magenta: #ff00ff;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+
+        /* --- PROGRESS BAR --- */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            z-index: 10001;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, var(--accent), var(--magenta));
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        #cursor {
+            position: fixed;
+            width: 20px; height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s;
+        }
+
+        .glow-orb {
+            position: fixed;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-10%, -10%) rotate(0deg); }
+            100% { transform: translate(50%, 50%) rotate(360deg); }
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10vw;
+        }
+
+        .glitch-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 0.8;
+            letter-spacing: -5px;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 5vw;
+            gap: 100px;
+            justify-content: center;
+        }
+
+        .place-card {
+            width: 400px;
+            position: relative;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            transition: 0.5s;
+            transform-style: preserve-3d;
+        }
+
+        .place-card:nth-child(even) { margin-top: 150px; }
+
+        .place-card img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 20px;
+            filter: grayscale(100%);
+            transition: 0.5s;
+        }
+
+        .place-card:hover img { filter: grayscale(0%); transform: translateZ(50px); }
+
+        .place-card h3 {
+            font-family: 'Syncopate';
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: var(--accent);
+        }
+
+        .description {
+            max-height: 0;
+            overflow: hidden;
+            transition: 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .place-card:hover .description {
+            max-height: 300px;
+            margin-top: 20px;
+        }
+
+        /* --- MUSIC & SHARE BUTTONS --- */
+        .controls-wrapper {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10000;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 1px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            font-family: 'Syncopate';
+            font-size: 0.7rem;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.05);
+            background: var(--accent);
+            color: black;
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .bar-container { display: flex; align-items: flex-end; gap: 3px; height: 15px; }
+        .bar { width: 3px; height: 100%; background: currentColor; border-radius: 2px; }
+        .playing .bar { animation: dance 0.8s infinite alternate; }
+        @keyframes dance { from { height: 20%; } to { height: 100%; } }
+
+        footer { padding: 10vw; border-top: 1px solid rgba(255,255,255,0.1); }
+        .social-link { font-family: 'Syncopate'; font-size: 2.5rem; display: block; color: white; text-decoration: none; margin-bottom: 20px; transition: 0.3s; }
+        .social-link:hover { color: var(--accent); transform: skewX(-10deg); }
+    </style>
+</head>
+<body>
+
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="cursor"></div>
+    <div class="glow-orb" style="background: var(--accent); top: -100px; left: -100px;"></div>
+    <div class="glow-orb" style="background: var(--magenta); bottom: -100px; right: -100px;"></div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="controls-wrapper">
+        <div class="btn-action" onclick="shareVibe()">
+            <span>SHARE VIBE 🚀</span>
+        </div>
+        <div class="btn-action" id="musicBtn" onclick="toggleMusic()">
+            <div class="bar-container">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <span id="musicStatus">PLAY MUSIC</span>
+        </div>
+    </div>
+
+    <section class="hero">
+        <p style="color: var(--accent); letter-spacing: 5px;">// SUPREME TRAVEL GUIDE 2026</p>
+        <h1 class="glitch-title">WORLD<br>UNLOCKED</h1>
+    </section>
+
+    <div class="grid-container">
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80" alt="Tokyo">
+            <h3>01. TOKYO, JAPAN</h3>
+            <div class="description">Tokyo is literally living in 2077 while we’re all stuck in 2026. Between the neon-soaked streets of Shinjuku and the hidden vintage thrifts in Shimokitazawa, this city is a sensory overload in the best way possible. It’s a perfect mix of high-tech convenience and deep-rooted tradition. Grab a coffee from a vending machine and get lost in the glitch.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80" alt="Santorini">
+            <h3>02. SANTORINI, GREECE</h3>
+            <div class="description">The blueprint for "Aesthetic Travel." Santorini’s whitewashed cliffs and sapphire-blue domes are so iconic they almost feel like a simulation. It’s the ultimate spot for sunset chasing and living your best "Mamma Mia" life. The vibe is pure luxury, coastal calm, and expensive energy. Every single photo you take here is a guaranteed banger. It is truly the peak of Mediterranean vibes.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80" alt="Bali">
+            <h3>03. BALI, INDONESIA</h3>
+            <div class="description">Bali is the spiritual headquarters for the Gen-Z nomad. From the emerald rice terraces of Ubud to the chaotic beach clubs of Canggu, it offers a dual reality of zen and party. It’s where you go to find yourself and lose your phone. The tropical greenery and infinity pools are essentially built for the 'gram. It’s a literal paradise that never misses.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1533903345306-15d1c30952de?auto=format&fit=crop&w=800&q=80" alt="Amalfi">
+            <h3>04. AMALFI, ITALY</h3>
+            <div class="description">Imagine driving a vintage convertible along cliffs that look like they were painted by hand. The Amalfi Coast is pure cinematic poetry. Positano’s pastel houses stacked on top of each other give off major "Old Money" vibes. It’s for the pasta lovers, the sun seekers, and anyone who wants to feel like a movie star for a week. Truly an elite tier destination.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1520637102912-2df6bb2aec6d?auto=format&fit=crop&w=800&q=80" alt="Iceland">
+            <h3>05. REYKJAVIK, ICELAND</h3>
+            <div class="description">Iceland is basically an alien planet masquerading as an island. Black sand beaches, blue geothermal lagoons, and the Northern Lights dancing above your head? It’s peak "Corecore" energy. Reykjavik serves as the cozy, quirky basecamp for adventures that involve glaciers and volcanoes. It’s moody, it’s raw, and it’s unlike anywhere else on Earth. If you want a nature reset, this is your home.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1539020140153-e479b8c22e70?auto=format&fit=crop&w=800&q=80" alt="Marrakech">
+            <h3>06. MARRAKECH, MOROCCO</h3>
+            <div class="description">Marrakech is a fever dream of colors, spices, and hidden courtyards. The souks are a labyrinth where you’ll find the coolest rugs and lanterns you’ve ever seen. The Riads are architectural masterpieces with tiled pools that are purely hypnotic. It’s an immersive cultural explosion that forces you to be present. The Red City is high-energy, high-fashion, and absolutely iconic.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80" alt="Banff">
+            <h3>07. BANFF, CANADA</h3>
+            <div class="description">If "Nature is Healing" was a place, it would be Banff. The turquoise water of Lake Louise is so bright it looks photoshopped. Surrounded by the jagged peaks of the Rockies, it’s the ultimate destination for the outdoorsy aesthetic. Whether you’re snowboarding in the winter or hiking in the summer, the views are consistently 11/10. It’s quiet luxury meets wild, rugged wilderness.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80" alt="Paris">
+            <h3>08. PARIS, FRANCE</h3>
+            <div class="description">Paris is a cliché for a reason—it’s flawless. Beyond the Eiffel Tower, the city is a collection of "Main Character" moments in every café and bookstore. The fashion is elite, the bread is life-changing, and the streets hum with a romantic, moody energy. It’s about the art, the history, and the effortless "Je ne sais quoi." Paris doesn't try; it just is.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80" alt="Seoul">
+            <h3>09. SEOUL, SOUTH KOREA</h3>
+            <div class="description">Seoul is the global capital of cool right now. From K-Pop culture to skincare shops that look like museums, the city is buzzing with creative energy. It’s a 24-hour city where you can get incredible street food at 3 AM and visit a quiet palace at 10 AM. The contrast between ancient gates and neon skyscrapers is a total vibe. Seoul is smart and fast.</div>
+        </div>
+
+        <div class="place-card">
+            <img src="https://images.pexels.com/photos/2190283/pexels-photo-2190283.jpeg?auto=compress&cs=tinysrgb&w=800" alt="NYC">
+            <h3>10. NYC, USA</h3>
+            <div class="description">The Concrete Jungle. NYC is the only place where you can feel like you’re in a movie just by walking to get a bagel. It’s fast-paced, loud, and incredibly inspiring. From the skyline views at DUMBO to the chaos of Times Square, it’s a city that never stops challenging you. It’s the ultimate hustle culture destination with a side of world-class art.</div>
+        </div>
+    </div>
+
+    <footer>
+        <h2 style="font-family: 'Syncopate'; margin-bottom: 50px; color: var(--magenta);">READY TO FLY? 🛸</h2>
+        <a href="mailto:vatslakshya01@gmail.com" class="social-link">EMAIL: Lakshya_vats01</a>
+        <a href="https://instagram.com/Lakshya_vats01" class="social-link">INSTA: @Lakshya_vats01</a>
+    </footer>
+
+    <script>
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Progress Bar Logic
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
+
+        // Music Logic
+        const music = document.getElementById('bgMusic');
+        const mBtn = document.getElementById('musicBtn');
+        function toggleMusic() {
+            if (music.paused) { music.play(); mBtn.classList.add('playing'); document.getElementById('musicStatus').innerText = "VIBING"; }
+            else { music.pause(); mBtn.classList.remove('playing'); document.getElementById('musicStatus').innerText = "PAUSED"; }
+        }
+
+        // Share API Logic
+        function shareVibe() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'WORLD: UNLOCKED',
+                    text: 'Check out this insane travel vibe guide by Lakshya!',
+                    url: window.location.href
+                });
+            } else {
+                alert("Copied link to clipboard!");
+                navigator.clipboard.writeText(window.location.href);
+            }
+        }
+
+        // 3D Card Logic
+        const cards = document.querySelectorAll('.place-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const rotateX = (e.clientY - (rect.top + rect.height / 2)) / 10;
+                const rotateY = ( (rect.left + rect.width / 2) - e.clientX) / 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => card.style.transform = `rotateX(0deg) rotateY(0deg)`);
+        });
+    </script>
+</body>
+</html>
